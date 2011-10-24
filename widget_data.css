@@ -1,0 +1,54 @@
+.widget-data .wrap h2 {padding-bottom: 20px;}
+
+.widget-data .sidebars {border-color: #DFDFDF; 
+						border-style: solid;
+						border-width: 1px;
+}
+
+.widget-data .title h3 {
+    font-family: Georgia,"Times New Roman","Bitstream Charter",Times,serif;
+    font-size: 15px;
+    font-weight: normal;
+    margin: 0;
+    overflow: hidden;
+    padding: 8px 10px;
+    white-space: nowrap;
+	width: 100px;
+}
+
+.widget-data .title {
+    border-style: solid;
+    border-width: 1px;
+    font-size: 13px;
+	border-color: #DFDFDF;
+    color: #464646;
+    text-shadow: 0 1px 0 #FFFFFF;
+	background-color: #F1F1F1;
+    background-image: -moz-linear-gradient(center top , #F9F9F9, #ECECEC);
+}
+
+#notifier{ display:block; width:100%; margin:0 auto; height:40px; border:1px solid #ccc; text-align: center; margin-bottom:10px }
+
+#notifier p { color:#fff; font:bold 16px 'Arial'; margin:10px 0; }
+
+#notifier.success { background:#0ee61c;}
+
+#notifier.error { background:#e00909; }
+
+#upload-button { display:none; margin:4px 0 0 10px; }
+
+#output-text {background:#fff; display:block; width:400px; height:20px; border:solid 1px #eee; padding:5px;}
+
+#button-upload {margin-top:20px;}
+
+.widget-data .left {float: left; margin-bottom:10px;}
+.widget-data .right {float: right}
+.widget-data .sidebars .sidebar label {font-size: 12px;}
+.widget-data .sidebars .sidebar h4 {margin: 0; padding: 8px 20px; background:#eee;}
+.widget-data .button-bottom {margin-top: 10px;}
+.widget-data .export-selection-error {float: right;}
+.widget-data .title p {margin: 0; float: right; padding-top: 10px; font-size: 11px; color: red; padding: 10px 10px 0 0; display: none;}
+
+div.sidebar div.widgets .import-form-row { padding-left:30px; }
+div.sidebar div.widgets .import-form-row:nth-child(odd) { background-color:#fff; }
+div.sidebar div.widgets .import-form-row:nth-child(even){ background-color:#F9F9F9; }
