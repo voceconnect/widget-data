@@ -1,0 +1,34 @@
+=== Plugin Name ===
+Contributors: kevinlangleyjr, smcafferty
+Tags: widget, import, export
+
+Gives the user the ability to export the current widget settings and states as a json file. You can then import those settings on a different server or installation of WordPress so you have the same widgets within the same sidebars as the export. The import will not overwrite any data currently within the sidebars, but instead will increment the widgets and add a new instance of the widget instead.
+
+**Please note that the plugin currently does not import anything if that particular sidebar is unavailable during the import.
+
+== Description ==
+
+Gives the user the ability to export the current widget settings and states as a json file. You can then import those settings on a different server or installation of WordPress so you have the same widgets within the same sidebars as the export. The import will not overwrite any data currently within the sidebars, but instead will increment the widgets and add a new instance of the widget instead.
+
+**Please note that the plugin currently does not import anything if that particular sidebar is unavailable during the import.
+
+== Installation ==
+
+This section describes how to install the plugin and get it working.
+
+e.g.
+
+1. Upload entire widget-data directory to the `/wp-content/plugins/` directory
+1. Activate the plugin through the 'Plugins' menu in WordPress
+
+
+== Changelog ==
+
+= 1.0 =
+* First Version
+
+== Upgrade Notice ==
+
+= 1.0 =
+First Version
+
