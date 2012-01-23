@@ -1,9 +1,26 @@
 <?php
 /*
- Plugin Name: Widget Data - Setting Import/Export Plugin
- Description: Adds functionality to export and import widget data
- Authors: Kevin Langley and Sean McCafferty
- */
+Plugin Name: Widget Data - Setting Import/Export Plugin
+Description: Adds functionality to export and import widget data
+Authors: Kevin Langley and Sean McCafferty
+Version: 0.1
+*******************************************************************
+Copyright 2011-2011 Kevin Langley & Sean McCafferty  (email : klangley@voceconnect.com & smccafferty@voceconnect.com)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*******************************************************************
+*/
 
 class Widget_Data {
 
@@ -119,7 +136,7 @@ class Widget_Data {
 						<?php
 						$json = $this->get_widget_settings_json();
 						$json_data = json_decode($json[0], true);
-						$json_url = $json[1];
+						$json_file = $json[1];
 
 						if (!$json_data)
 							return;
@@ -175,7 +192,7 @@ class Widget_Data {
 									<?php endif; ?>
 								<?php endforeach; ?>
 							<?php endif; ?>
-							<input type="hidden" name="import_url" value="<?php echo $json_url; ?>"/>
+							<input type="hidden" name="import_file" value="<?php echo $json_file; ?>"/>
 							<input type="hidden" name="action" value="widget_import_submit"/>
 						</div> <!-- end sidebars -->
 						<div class="right">
@@ -320,8 +337,8 @@ function parse_export_data($posted_array){
 	
 	function widget_import_submit() {
 		$widgets = $_POST['widgets'];
-		$json_data = wp_remote_get($_POST['import_url']);
-		$json_data = json_decode($json_data['body'], true);
+		$json_data = file_get_contents($_POST['import_file']);
+		$json_data = json_decode($json_data, true);
 		$sidebar_data = $json_data[0];
 		$widget_data = $json_data[1];
 		$remove_array = array();
@@ -358,9 +375,8 @@ function parse_export_data($posted_array){
 	
 	function get_widget_settings_json() {
 		$widget_settings = $this->upload_widget_settings_file();
-		$file_contents = wp_remote_get($widget_settings['url']);
-
-		return array($file_contents['body'], $widget_settings['url']);
+		$file_contents = file_get_contents($widget_settings['file']);
+		return array($file_contents, $widget_settings['file']);
 	}
 
 	function upload_widget_settings_file() {
