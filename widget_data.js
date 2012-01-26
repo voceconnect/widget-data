@@ -87,7 +87,7 @@ jQuery( function($) {
 
 	
 	function redirect_to_widgets() {
-		window.location.replace("/wp-admin/widgets.php");
+		window.location.replace(widgets_url);
 	}
 
 });

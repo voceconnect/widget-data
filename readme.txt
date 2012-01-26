@@ -1,6 +1,9 @@
 === Widget Settings Importer/Exporter ===
 Contributors: kevinlangleyjr, smccafferty
 Tags: widget, import, export
+Requires at least: 2.8
+Tested up to: 3.3
+Stable tag: trunk
 
 Allows you to export and import widgets settings.
 
@@ -16,17 +19,15 @@ This section describes how to install the plugin and get it working.
 
 e.g.
 
-1. Upload entire widget-data directory to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
+1. Upload entire widget-settings-importexport directory to the `/wp-content/plugins/` directory
+2. Activate the plugin through the 'Plugins' menu in WordPress
 
 
 == Changelog ==
 
-= 1.0 =
+= 0.1 =
 * First Version
 
-== Upgrade Notice ==
-
-= 1.0 =
-First Version
+= 0.2 =
+* Fixing blank redirect with WP installed within sub directory
 
