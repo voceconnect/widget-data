@@ -3,7 +3,7 @@
 Plugin Name: Widget Data - Setting Import/Export Plugin
 Description: Adds functionality to export and import widget data
 Authors: Kevin Langley and Sean McCafferty
-Version: 0.2
+Version: 0.3
 *******************************************************************
 Copyright 2011-2011 Kevin Langley & Sean McCafferty  (email : klangley@voceconnect.com & smccafferty@voceconnect.com)
 
@@ -322,17 +322,10 @@ function parse_export_data($posted_array){
 	
 	function export_widget_settings() {
 		if($_POST) {
-			$temp_file = tempnam(sys_get_temp_dir(), 'widget_settings');
-			$file = fopen($temp_file, 'w');
-			unset($_POST['export-widgets']);
-			$json = $this->parse_export_data($_POST);
-			fwrite($file, $json);
 			header("Content-Description: File Transfer");
 			header("Content-Disposition: attachment; filename=widget_data.json");
 			header("Content-Type: application/octet-stream");
-			readfile($temp_file);
-			fclose($file); 
-			unlink($temp_file); // this removes the file
+			echo $json = $this->parse_export_data($_POST);
 			exit();
 		}
 	}
@@ -466,3 +459,4 @@ function parse_export_data($posted_array){
 
 add_action('init', create_function('', 'new Widget_Data();'));
 ?>
+

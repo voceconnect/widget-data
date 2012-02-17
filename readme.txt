@@ -31,3 +31,5 @@ e.g.
 = 0.2 =
 * Fixing blank redirect with WP installed within sub directory
 
+= 0.3 =
+* Fixing export of empty file by instead of creating temp file, it will just output the json
