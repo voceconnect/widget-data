@@ -3,7 +3,7 @@
 Plugin Name: Widget Data - Setting Import/Export Plugin
 Description: Adds functionality to export and import widget data
 Authors: Kevin Langley and Sean McCafferty
-Version: 0.3
+Version: 0.4
 *******************************************************************
 Copyright 2011-2011 Kevin Langley & Sean McCafferty  (email : klangley@voceconnect.com & smccafferty@voceconnect.com)
 
@@ -458,5 +458,3 @@ function parse_export_data($posted_array){
 }
 
 add_action('init', create_function('', 'new Widget_Data();'));
-?>
-

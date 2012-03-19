@@ -33,3 +33,6 @@ e.g.
 
 = 0.3 =
 * Fixing export of empty file by instead of creating temp file, it will just output the json
+                                                                                                                                             
+= 0.4 =
+* Fixing headers already sent error
