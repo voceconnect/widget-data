@@ -59,7 +59,7 @@ class Widget_Data {
 		<div class="widget-data export-widget-settings">
 			<div class="wrap">
 				<h2>Widget Setting Export</h2>
-				<div id="notifier"></div>
+				<div id="notifier" style="display: none;"></div>
 				<form action="" method="post" id="widget-export-settings">
 					<div class="left">
 							<button class="button-bottom button button-highlighted" type="button" name="SelectAllActive" id="SelectAllActive">Select All Active Widgets</button>
@@ -93,7 +93,7 @@ class Widget_Data {
 
 										?>
 										<div class="import-form-row">
-											<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?>" type="checkbox" name="<?php echo $widget; ?>" id="meta_<?php echo $widget; ?>" />
+											<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?> widget-checkbox" type="checkbox" name="<?php echo $widget; ?>" id="meta_<?php echo $widget; ?>" />
 											<label for="meta_<?php echo $widget; ?>">&nbsp;
 												<?php
 												echo ucfirst($widget_type);
@@ -127,7 +127,7 @@ class Widget_Data {
 				<h2>Widget Setting Import</h2>
 				
 					<?php if (isset($_FILES['upload-file'])) : ?>
-					<div id="notifier"></div>
+					<div id="notifier" style="display: none;"></div>
 					<div class="import-wrapper">
 					<div class="left">
 							<button class="button-bottom button button-highlighted" type="button" name="SelectAllActive" id="SelectAllActive">Select All Active Widgets</button>
@@ -175,7 +175,7 @@ class Widget_Data {
 													endif;
 													?>
 												<div class="import-form-row">
-														<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?>" type="checkbox" name="widgets[<?php echo $widget_type; ?>][<?php echo $widget_type_index; ?>]" id="meta_<?php echo $widget; ?>" />
+														<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?> widget-checkbox" type="checkbox" name="widgets[<?php echo $widget_type; ?>][<?php echo $widget_type_index; ?>]" id="meta_<?php echo $widget; ?>" />
 														<label for="meta_<?php echo $widget; ?>">&nbsp;
 															<?php
 															echo ucfirst($widget_type);
@@ -206,8 +206,10 @@ class Widget_Data {
 						<form action="" id="upload-widget-data" method="post" enctype="multipart/form-data">
 						<p>Select the file that contains widget settings</p>
 						<div id="output-text" style="float:left;"></div>
-						<div id="upload-button" class="button-secondary" style="width:135px; float:left;">Click here to select a file</div>
-						<input type="file" name="upload-file" id="upload-file" size="40" />
+						<label>
+							<input type="file" name="upload-file" id="upload-file" size="40" />
+							<button id="upload-button" class="button-secondary">Select a file</button>
+						</label>
 						<div style="clear:both;"></div>
 						<div class="block">
 							<button type="submit" name="button-upload" id="button-upload" class="button">Show Widget Settings</button>
@@ -359,13 +361,15 @@ function parse_export_data($posted_array){
 		
 		$sidebar_data = array_filter($sidebar_data);
 		$new_array = array($sidebar_data, $widgets);
+		ini_set('display_errors', 0);
+		error_reporting(0);
 		if($this->parse_import_data($new_array)){
 			echo "SUCCESS";
 		} else {
 			echo "ERROR";
 		}
 		
-		die(); // this is required to return a proper result
+		die;
 	}
 	
 	function get_widget_settings_json() {
