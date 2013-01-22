@@ -2,8 +2,8 @@
 Contributors: kevinlangleyjr, smccafferty, markparolisi, voceplatforms
 Tags: widget, import, export
 Requires at least: 2.8
-Tested up to: 3.3
-Stable tag: 1.0
+Tested up to: 3.5
+Stable tag: 1.1
 
 Allows you to export and import widgets settings.
 
@@ -24,6 +24,10 @@ Gives the user the ability to export the current widget settings and states as a
 2. Upload JSON export file
 
 == Changelog ==
+
+= 1.1 =
+* Refactoring for performance / integrating changes made by Automattic
+* Better styles for wp-admin
 
 = 1.0 =
 * Refactoring for performace.
