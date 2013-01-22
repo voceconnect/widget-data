@@ -2,10 +2,11 @@
 /*
   Plugin Name: Widget Data - Setting Import/Export Plugin
   Description: Adds functionality to export and import widget data
-  Authors: Kevin Langley, Sean McCafferty, Mark Parolisi
+  Author: Voce Communications - Kevin Langley, Sean McCafferty, Mark Parolisi
+  Author URI: http://vocecommunications.com
   Version: 1.0
  * ******************************************************************
-  Copyright 2011-2011 Kevin Langley & Sean McCafferty  (email : klangley@voceconnect.com & smccafferty@voceconnect.com)
+  Copyright 2011-2011 Voce Communications
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -24,61 +25,55 @@
 
 class Widget_Data {
 
-	var $import_filename;
-
 	/**
-	 * @constructor 
+	 * initialize
 	 */
-	function __construct() {
-		add_action( 'admin_menu', array( $this, 'add_admin_menus' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'add_admin_scripts' ) );
-		add_action( 'load-tools_page_widget-settings-export', array( $this, 'export_widget_settings' ) );
-		add_action( 'wp_ajax_widget_import_submit', array( $this, 'widget_import_submit' ) );
-		add_filter( 'upload_mimes', array( $this, 'json_upload_mimes' ) );
-	}
+	public static function init() {
+		if( !is_admin() )
+			return;
 
-	/**
-	 * Load JS and CSS
-	 * @param type $hook 
-	 */
-	function add_admin_scripts( $hook ) {
-		if ( 'tools_page_widget-settings-import' != $hook || 'tools_page_widget-settings-export' != $hook ) {
-			wp_register_style( 'widget_data_css', plugins_url( '/widget-data.css', __FILE__ ) );
-			wp_enqueue_style( 'widget_data_css' );
-			wp_register_script( 'widget_data', plugins_url( '/widget-data.js', __FILE__ ) );
-			wp_enqueue_script( 'widget_data' );
-			wp_localize_script( 'widget_data', 'widgets_url', get_admin_url( false, 'widgets.php' ) );
-		}
+		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menus' ) );
+		add_action( 'load-tools_page_widget-settings-export', array( __CLASS__, 'export_widget_settings' ) );
+		add_action( 'wp_ajax_import_widget_data', array( __CLASS__, 'ajax_import_widget_data' ) );
 	}
 
 	/**
 	 * Register admin pages 
 	 */
-	function add_admin_menus() {
+	public static function add_admin_menus() {
 		// export
-		$this->submenu_export = add_submenu_page( 'tools.php', 'Widget Settings Export', 'Widget Settings Export', 'administrator', 'widget-settings-export', array( &$this, 'export_settings_page' ) );
+		$export_page = add_management_page( 'Widget Settings Export', 'Widget Settings Export', 'manage_options', 'widget-settings-export', array( __CLASS__, 'export_settings_page' ) );
 		//import
-		$this->submenu_import = add_submenu_page( 'tools.php', 'Widget Settings Import', 'Widget Settings Import', 'administrator', 'widget-settings-import', array( &$this, 'import_settings_page' ) );
+		$import_page = add_management_page( 'Widget Settings Import', 'Widget Settings Import', 'manage_options', 'widget-settings-import', array( __CLASS__, 'import_settings_page' ) );
+
+		add_action( 'admin_enqueue_scripts', function($hook) use ($export_page, $import_page){
+			if( !in_array( $hook, array( $export_page, $import_page ) ) )
+				return;
+
+			wp_enqueue_style( 'widget_data', plugins_url( '/widget-data.css', __FILE__ ) );
+			wp_enqueue_script( 'widget_data', plugins_url( '/widget-data.js', __FILE__ ), array( 'jquery', 'wp-ajax-response' ) );	
+			wp_localize_script( 'widget_data', 'widgets_url', get_admin_url( false, 'widgets.php' ) );
+		} );
 	}
 
 	/**
 	 * HTML for export admin page 
 	 */
-	function export_settings_page() {
-		$sidebar_widgets = $this->order_sidebar_widgets( wp_get_sidebars_widgets() );
+	public static function export_settings_page() {
+		$sidebar_widgets = self::order_sidebar_widgets( wp_get_sidebars_widgets() );
 		?>
 		<div class="widget-data export-widget-settings">
 			<div class="wrap">
 				<h2>Widget Setting Export</h2>
 				<div id="notifier" style="display: none;"></div>
 				<form action="" method="post" id="widget-export-settings">
-					<div class="left">
-						<button class="button-bottom button button-highlighted" type="button" name="SelectAllActive" id="SelectAllActive">Select All Active Widgets</button>
-						<button class="button-bottom button button-highlighted" type="button" name="UnSelectAllActive" id="UnSelectAllActive">Un-Select All Active Widgets</button>
-					</div>
-					<div style="clear:both;"></div>
+					<input type="hidden" id="action" name="action" value="export_widget_settings" />
+					<?php wp_nonce_field('export_widget_settings', '_wpnonce'); ?>
+					<p>
+						<a class="button select-all">Select All Active Widgets</a>
+						<a class="button unselect-all">Un-Select All Active Widgets</a>
+					</p>
 					<div class="title">
-						<p class="widget-selection-error">Please select a widget to continue.</p>
 						<h3>Sidebars</h3>
 						<div class="clear"></div>
 					</div>
@@ -88,7 +83,7 @@ class Widget_Data {
 							if ( count( $widget_list ) == 0 )
 								continue;
 
-							$sidebar_info = $this->get_sidebar_info( $sidebar_name );
+							$sidebar_info = self::get_sidebar_info( $sidebar_name );
 							?>
 
 							<div class="sidebar">
@@ -100,21 +95,16 @@ class Widget_Data {
 
 										$widget_type = trim( substr( $widget, 0, strrpos( $widget, '-' ) ) );
 										$widget_type_index = trim( substr( $widget, strrpos( $widget, '-' ) + 1 ) );
-										$option_name = 'widget_' . $widget_type;
-										$widget_options = get_option( $option_name );
-										$widget_title = isset( $widget_options[$widget_type_index]['title'] ) ? $widget_options[$widget_type_index]['title'] : '';
+										$widget_options = get_option( 'widget_' . $widget_type );
+										$widget_title = isset( $widget_options[$widget_type_index]['title'] ) ? $widget_options[$widget_type_index]['title'] : $widget_type_index;
 										?>
 										<div class="import-form-row">
-											<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?> widget-checkbox" type="checkbox" name="<?php echo $widget; ?>" id="meta_<?php echo $widget; ?>" />
-											<label for="meta_<?php echo $widget; ?>">&nbsp;
-												<?php
-												echo ucfirst( $widget_type );
-
-												if ( !empty( $widget_title ) ) :
-													echo (' - ' . $widget_title);
-												else :
-													echo (' - ' . $widget_type_index);
-												endif;
+											<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?> widget-checkbox" type="checkbox" name="<?php echo esc_attr( $widget ); ?>" id="<?php echo esc_attr( 'meta_' .  $widget ); ?>" />
+											<label for="<?php echo esc_attr( 'meta_' . $widget ); ?>">
+												<?php 
+													echo ucfirst( $widget_type );
+													if( !empty( $widget_title ) )
+														echo ' - ' . $widget_title; 
 												?>
 											</label>
 										</div>
@@ -123,9 +113,7 @@ class Widget_Data {
 							</div> <!-- end sidebar -->
 						<?php endforeach; ?>
 					</div> <!-- end sidebars -->
-					<div class="right">
-						<button class="button-bottom button-primary" type="submit" name="export-widgets" id="export-widgets">Export Widget Settings</button>
-					</div>
+					<input class="button-bottom button-primary" type="submit" value="Export Widget Settings"/>
 				</form>
 			</div> <!-- end wrap -->
 		</div> <!-- end export-widget-settings -->
@@ -136,30 +124,33 @@ class Widget_Data {
 	 * HTML for import admin page
 	 * @return type 
 	 */
-	function import_settings_page() {
+	public static function import_settings_page() {
 		?>
 		<div class="widget-data import-widget-settings">
 			<div class="wrap">
 				<h2>Widget Setting Import</h2>
-
-				<?php if ( isset( $_FILES['upload-file'] ) ) : ?>
+				<?php if ( isset( $_FILES['widget-upload-file'] ) ) : ?>
 					<div id="notifier" style="display: none;"></div>
 					<div class="import-wrapper">
-						<div class="left">
-							<button class="button-bottom button button-highlighted" type="button" name="SelectAllActive" id="SelectAllActive">Select All Active Widgets</button>
-							<button class="button-bottom button button-highlighted" type="button" name="UnSelectAllActive" id="UnSelectAllActive">Un-Select All Active Widgets</button>
-						</div>
-						<div style="clear:both;"></div>
+						<p>
+							<a class="button select-all">Select All Active Widgets</a>
+							<a class="button unselect-all">Un-Select All Active Widgets</a>
+						</p>
 						<form action="" id="import-widget-data" method="post">
-							<?php
-							$json = $this->get_widget_settings_json();
-							$json_data = json_decode( $json[0], true );
-							$json_file = $json[1];
+							<?php wp_nonce_field('import_widget_data', '_wpnonce');
 
-							if ( !$json_data ) {
-								return;
-							}
+								$json = self::get_widget_settings_json();
+
+								if( is_wp_error($json) )
+									wp_die( $json->get_error_message() );
+
+								if( !( $json_data = json_decode( $json[0], true ) ) )
+									return;
+
+								$json_file = $json[1];
 							?>
+							<input type="hidden" name="import_file" value="<?php echo esc_attr( $json_file ); ?>"/>
+							<input type="hidden" name="action" value="import_widget_data"/>
 							<div class="title">
 								<p class="widget-selection-error">Please select a widget to continue.</p>
 								<h3>Sidebars</h3>
@@ -168,14 +159,12 @@ class Widget_Data {
 							<div class="sidebars">
 								<?php
 								if ( isset( $json_data[0] ) ) :
-									foreach ( $this->order_sidebar_widgets( $json_data[0] ) as $sidebar_name => $widget_list ) :
+									foreach ( self::order_sidebar_widgets( $json_data[0] ) as $sidebar_name => $widget_list ) :
 										if ( count( $widget_list ) == 0 ) {
 											continue;
 										}
-										$sidebar_info = $this->get_sidebar_info( $sidebar_name );
-										?>
-
-										<?php if ( $sidebar_info ) : ?>
+										$sidebar_info = self::get_sidebar_info( $sidebar_name );
+										if ( $sidebar_info ) : ?>
 											<div class="sidebar">
 												<h4><?php echo $sidebar_info['name']; ?></h4>
 
@@ -186,24 +175,25 @@ class Widget_Data {
 
 														$widget_type = trim( substr( $widget, 0, strrpos( $widget, '-' ) ) );
 														$widget_type_index = trim( substr( $widget, strrpos( $widget, '-' ) + 1 ) );
-														$option_name = 'widget_' . $widget_type;
-														$widget_type_options = $this->get_option_from_array( $widget_type, $json_data[1] );
-														if ( $widget_type_options ) :
-															$widget_title = isset( $widget_type_options[$widget_type_index]['title'] ) ? $widget_type_options[$widget_type_index]['title'] : '';
-															$widget_options = $widget_type_options[$widget_type_index];
-														endif;
+														foreach ( $json_data[1] as $name => $option ) {
+															if ( $name == $widget_type ) {
+																$widget_type_options = $option;
+																break;
+															}
+														}
+														if ( !isset($widget_type_options) || !$widget_type_options )
+															continue;
+
+														$widget_title = isset( $widget_type_options[$widget_type_index]['title'] ) ? $widget_type_options[$widget_type_index]['title'] : '';
+														$widget_options = $widget_type_options[$widget_type_index];
 														?>
 														<div class="import-form-row">
-															<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?> widget-checkbox" type="checkbox" name="widgets[<?php echo $widget_type; ?>][<?php echo $widget_type_index; ?>]" id="meta_<?php echo $widget; ?>" />
-															<label for="meta_<?php echo $widget; ?>">&nbsp;
-																<?php
-																echo ucfirst( $widget_type );
-
-																if ( !empty( $widget_title ) ) :
-																	echo (' - ' . $widget_title);
-																else :
-																	echo (' - ' . $widget_type_index);
-																endif;
+															<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?> widget-checkbox" type="checkbox" name="<?php echo esc_attr( printf('widgets[%s][%d]', $widget_type, $widget_type_index) ); ?>" id="<?php echo esc_attr( 'meta_' . $widget ); ?>" />
+															<label for="meta_<?php echo esc_attr( 'meta_' . $widget ); ?>">&nbsp;
+																<?php 
+																	echo ucfirst( $widget_type );
+																	if( !empty( $widget_title ) )
+																		echo ' - ' . $widget_title; 
 																?>
 															</label>
 														</div>
@@ -213,26 +203,19 @@ class Widget_Data {
 										<?php endif; ?>
 									<?php endforeach; ?>
 								<?php endif; ?>
-								<input type="hidden" name="import_file" value="<?php echo $json_file; ?>"/>
-								<input type="hidden" name="action" value="widget_import_submit"/>
 							</div> <!-- end sidebars -->
-							<div class="right">
-								<button class="button-bottom button-primary" type="submit" name="import-widgets" id="import-widgets">Import Widget Settings</button>
-							</div>
+							<input class="button-bottom button-primary" type="submit" name="import-widgets" id="import-widgets" value="Import Widget Settings" />
 						</form>
 					</div>
 				<?php else : ?>
 					<form action="" id="upload-widget-data" method="post" enctype="multipart/form-data">
 						<p>Select the file that contains widget settings</p>
-						<div id="output-text" style="float:left;"></div>
-						<label>
-							<input type="file" name="upload-file" id="upload-file" size="40" />
-							<button id="upload-button" class="button-secondary">Select a file</button>
-						</label>
-						<div style="clear:both;"></div>
-						<div class="block">
-							<button type="submit" name="button-upload" id="button-upload" class="button">Show Widget Settings</button>
-						</div>
+						<p>
+							<input type="text" disabled="disabled" class="file-name regular-text" />
+							<a id="upload-button" class="button upload-button">Select a file</a>
+							<input type="file" name="widget-upload-file" id="widget-upload-file" size="40" style="display:none;" />
+						</p>
+						<input type="submit" name="button-upload-submit" id="button-upload-submit" class="button" value="Show Widget Settings" />
 					</form>
 				<?php endif; ?>
 			</div> <!-- end wrap -->
@@ -245,7 +228,7 @@ class Widget_Data {
 	 * @param array $posted_array
 	 * @return string 
 	 */
-	function parse_export_data( $posted_array ) {
+	public static function parse_export_data( $posted_array ) {
 		$sidebars_array = get_option( 'sidebars_widgets' );
 		$sidebar_export = array( );
 		foreach ( $sidebars_array as $sidebar => $widgets ) {
@@ -270,13 +253,14 @@ class Widget_Data {
 			$widget_val = get_option( 'widget_' . $widget['type'] );
 			$multiwidget_val = $widget_val['_multiwidget'];
 			$widgets_array[$widget['type']][$widget['type-index']] = $widget_val[$widget['type-index']];
-			if ( isset( $widgets_array[$widget['type']]['_multiwidget'] ) ) {
+			if ( isset( $widgets_array[$widget['type']]['_multiwidget'] ) )
 				unset( $widgets_array[$widget['type']]['_multiwidget'] );
-			}
+
 			$widgets_array[$widget['type']]['_multiwidget'] = $multiwidget_val;
 		}
 		unset( $widgets_array['export'] );
 		$export_array = array( $sidebar_export, $widgets_array );
+		error_log(var_export($export_array, true));
 		$json = json_encode( $export_array );
 		return $json;
 	}
@@ -285,7 +269,7 @@ class Widget_Data {
 	 * Import widgets
 	 * @param array $import_array
 	 */
-	function parse_import_data( $import_array ) {
+	public static function parse_import_data( $import_array ) {
 		$sidebars_data = $import_array[0];
 		$widget_data = $import_array[1];
 		$current_sidebars = get_option( 'sidebars_widgets' );
@@ -299,10 +283,10 @@ class Widget_Data {
 					$title = trim( substr( $import_widget, 0, strrpos( $import_widget, '-' ) ) );
 					$index = trim( substr( $import_widget, strrpos( $import_widget, '-' ) + 1 ) );
 					$current_widget_data = get_option( 'widget_' . $title );
-					$new_widget_name = $this->get_new_widget_name( $title, $index );
+					$new_widget_name = self::get_new_widget_name( $title, $index );
 					$new_index = trim( substr( $new_widget_name, strrpos( $new_widget_name, '-' ) + 1 ) );
 
-					if ( is_array( $new_widgets[$title] ) ) {
+					if ( !empty( $new_widgets[ $title ] ) && is_array( $new_widgets[$title] ) ) {
 						while ( array_key_exists( $new_index, $new_widgets[$title] ) ) {
 							$new_index++;
 						}
@@ -329,26 +313,26 @@ class Widget_Data {
 
 		if ( isset( $new_widgets ) && isset( $current_sidebars ) ) {
 			update_option( 'sidebars_widgets', $current_sidebars );
-			foreach ( $new_widgets as $title => $content ) {
+
+			foreach ( $new_widgets as $title => $content )
 				update_option( 'widget_' . $title, $content );
-			}
 
 			return true;
-		} else {
-			return false;
 		}
+
+		return false;
 	}
 
 	/**
 	 * Output the JSON for download
 	 */
-	function export_widget_settings() {
+	public static function export_widget_settings() {
 		// @TODO check something better than just $_POST
-		if ( $_POST ) {
+		if ( isset( $_POST['action'] ) && $_POST['action'] == 'export_widget_settings' ){
 			header( "Content-Description: File Transfer" );
 			header( "Content-Disposition: attachment; filename=widget_data.json" );
 			header( "Content-Type: application/octet-stream" );
-			echo $json = $this->parse_export_data( $_POST );
+			echo self::parse_export_data( $_POST );
 			exit;
 		}
 	}
@@ -356,13 +340,26 @@ class Widget_Data {
 	/**
 	 * Parse JSON import file and load
 	 */
-	function widget_import_submit() {
-		$widgets = $_POST['widgets'];
-		$json_data = file_get_contents( $_POST['import_file'] );
+	public static function ajax_import_widget_data() {
+		$response = array(
+			'what' => 'widget_import_export',
+			'action' => 'import_submit'
+		);
+
+		$widgets = isset( $_POST['widgets'] ) ? $_POST['widgets'] : false;
+		$import_file = isset( $_POST['import_file'] ) ? $_POST['import_file'] : false;
+
+		if( empty($widgets) || empty($import_file) ){
+			$response['id'] = new WP_Error('import_widget_data', 'No widget data posted to import');
+			$response = new WP_Ajax_Response( $response );
+			$response->send();
+		}
+
+		$json_data = file_get_contents( $import_file );
 		$json_data = json_decode( $json_data, true );
 		$sidebar_data = $json_data[0];
 		$widget_data = $json_data[1];
-		foreach ( $sidebar_data as $title => &$sidebar ) {
+		foreach ( $sidebar_data as $title => $sidebar ) {
 			$count = count( $sidebar );
 			for ( $i = 0; $i < $count; $i++ ) {
 				$widget = array( );
@@ -376,43 +373,46 @@ class Widget_Data {
 		}
 
 		foreach ( $widgets as $widget_title => $widget_value ) {
-			foreach ( $widget_value as $k => $v ) {
-				$widgets[$widget_title][$k] = $widget_data[$widget_title][$k];
+			foreach ( $widget_value as $widget_key => $widget_value ) {
+				$widgets[$widget_title][$widget_key] = $widget_data[$widget_title][$widget_key];
 			}
 		}
 
-		$sidebar_data = array_filter( $sidebar_data );
-		$new_array = array( $sidebar_data, $widgets );
-		ini_set( 'display_errors', 0 );
-		error_reporting( 0 );
-		if ( $this->parse_import_data( $new_array ) ) {
-			echo "SUCCESS";
-		} else {
-			echo "ERROR";
-		}
+		$sidebar_data = array( array_filter( $sidebar_data ), $widgets );
+		$response['id'] = ( self::parse_import_data( $sidebar_data ) ) ? true : new WP_Error( 'widget_import_submit', 'Unknown Error' );
 
-		exit;
+		$response = new WP_Ajax_Response( $response );
+		$response->send();
 	}
 
 	/**
 	 * Read uploaded JSON file
 	 * @return type 
 	 */
-	function get_widget_settings_json() {
-		$widget_settings = $this->upload_widget_settings_file();
-		$file_contents = file_get_contents( $widget_settings['file'] );
-		return array( $file_contents, $widget_settings['file'] );
+	public static function get_widget_settings_json() {
+		$widget_settings = self::upload_widget_settings_file();
+		
+		if( is_wp_error( $widget_settings ) || ! $widget_settings )
+			return false;
+
+		if( isset( $widget_settings['error'] ) )
+			return new WP_Error( 'widget_import_upload_error', $widget_settings['error'] );
+
+		$file_contents = file_get_contents( $widget_settings['url'] );
+		return array( $file_contents, $widget_settings['url'] );
 	}
 
 	/**
 	 * Upload JSON file
 	 * @return boolean 
 	 */
-	function upload_widget_settings_file() {
-		if ( isset( $_FILES['upload-file'] ) ) {
-			$overrides = array( 'test_form' => false );
-			$upload = wp_handle_upload( $_FILES['upload-file'], $overrides );
+	public static function upload_widget_settings_file() {
+		if ( isset( $_FILES['widget-upload-file'] ) ) {
+			add_filter( 'upload_mimes', array( __CLASS__, 'json_upload_mimes' ) );
 
+			$upload = wp_handle_upload( $_FILES['widget-upload-file'], array( 'test_form' => false ) );
+
+			remove_filter( 'upload_mimes', array( __CLASS__, 'json_upload_mimes' ) );
 			return $upload;
 		}
 
@@ -425,13 +425,13 @@ class Widget_Data {
 	 * @param string $widget_index
 	 * @return string 
 	 */
-	function get_new_widget_name( $widget_name, $widget_index ) {
+	public static function get_new_widget_name( $widget_name, $widget_index ) {
 		$current_sidebars = get_option( 'sidebars_widgets' );
 		$all_widget_array = array( );
 		foreach ( $current_sidebars as $sidebar => $widgets ) {
 			if ( !empty( $widgets ) && is_array( $widgets ) && $sidebar != 'wp_inactive_widgets' ) {
-				foreach ( $widgets as $w ) {
-					$all_widget_array[] = $w;
+				foreach ( $widgets as $widget ) {
+					$all_widget_array[] = $widget;
 				}
 			}
 		}
@@ -444,55 +444,23 @@ class Widget_Data {
 
 	/**
 	 *
-	 * @param string $option_name
-	 * @param array $array_options
-	 * @return boolean 
-	 */
-	function get_option_from_array( $option_name, $array_options ) {
-		foreach ( $array_options as $name => $option ) {
-			if ( $name == $option_name ) {
-				return $option;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 *
 	 * @global type $wp_registered_sidebars
 	 * @param type $sidebar_id
 	 * @return boolean 
 	 */
-	function get_sidebar_info( $sidebar_id ) {
+	public static function get_sidebar_info( $sidebar_id ) {
 		global $wp_registered_sidebars;
 
 		//since wp_inactive_widget is only used in widgets.php
-		if ( $sidebar_id == 'wp_inactive_widgets' ) {
+		if ( $sidebar_id == 'wp_inactive_widgets' )
 			return array( 'name' => 'Inactive Widgets', 'id' => 'wp_inactive_widgets' );
-		}
 
 		foreach ( $wp_registered_sidebars as $sidebar ) {
-			if ( isset( $sidebar['id'] ) && $sidebar['id'] == $sidebar_id ) {
+			if ( isset( $sidebar['id'] ) && $sidebar['id'] == $sidebar_id )
 				return $sidebar;
-			}
 		}
 
 		return false;
-	}
-
-	/**
-	 *
-	 * @global type $wp_registered_widgets
-	 * @param type $widget
-	 * @return boolean 
-	 */
-	function get_widget_info( $widget ) {
-		global $wp_registered_widgets;
-		if ( isset( $wp_registered_widgets[$widget] ) ) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 	/**
@@ -500,7 +468,7 @@ class Widget_Data {
 	 * @param array $sidebar_widgets
 	 * @return type 
 	 */
-	function order_sidebar_widgets( $sidebar_widgets ) {
+	public static function order_sidebar_widgets( $sidebar_widgets ) {
 		$inactive_widgets = false;
 
 		//seperate inactive widget sidebar from other sidebars so it can be moved to the end of the array, if it exists
@@ -518,11 +486,11 @@ class Widget_Data {
 	 * @param array $existing_mimes
 	 * @return string 
 	 */
-	function json_upload_mimes( $existing_mimes = array( ) ) {
+	public static function json_upload_mimes( $existing_mimes = array( ) ) {
 		$existing_mimes['json'] = 'application/json';
 		return $existing_mimes;
 	}
 
 }
 
-add_action( 'init', create_function( '', 'new Widget_Data();' ) );
+add_action( 'init', array( 'Widget_Data', 'init' ) );
