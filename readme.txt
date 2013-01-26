@@ -3,13 +3,16 @@ Contributors: kevinlangleyjr, smccafferty, markparolisi, voceplatforms
 Tags: widget, import, export
 Requires at least: 2.8
 Tested up to: 3.5
-Stable tag: 1.1
+Stable tag: 1.2
 
 Allows you to export and import widgets settings.
 
 == Description ==
 
 Gives the user the ability to export the current widget settings and states as a json file. You can then import those settings on a different server or installation of WordPress so you have the same widgets within the same sidebars as the export. The import will not overwrite any data currently within the sidebars, but instead will increment the widgets and add a new instance of the widget instead.
+
+Requirements:
+PHP 5.3+
 
 **Please note that the plugin currently does not import anything if that particular sidebar is unavailable during the import.
 
@@ -22,6 +25,10 @@ Gives the user the ability to export the current widget settings and states as a
 
 1. Choose which widgets to export
 2. Upload JSON export file
+
+== FAQ ==
+= The plugin won't activate, what's the deal? =
+Before inserting a support request, please ensure that you have met the requirements of the plugin.
 
 == Changelog ==
 

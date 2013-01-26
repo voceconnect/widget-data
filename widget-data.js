@@ -12,7 +12,7 @@
 		notification.addClass(className);
 
 		notification.fadeIn('slow');
-		jQuery('body,html').animate({
+		$('body,html').animate({
 			scrollTop: 0
 		}, 800);
 	},
@@ -84,9 +84,9 @@
 
 				$('.import-wrapper').fadeOut('slow');
 				show_notification('All widgets with registered sidebars have been imported successfully.', 'updated');
-				// window.setTimeout(function () {
-				// 	window.location.replace(widgets_url);
-				// }, 4000);
+				window.setTimeout(function () {
+					window.location.replace(widgets_url);
+				}, 4000);
 			});
 		});
 
