@@ -50,8 +50,8 @@ class Widget_Data {
 			if( !in_array( $hook, array( $export_page, $import_page ) ) )
 				return;
 
-			wp_enqueue_style( 'widget_data', plugins_url( '/widget-data.css', __FILE__ ) );
-			wp_enqueue_script( 'widget_data', plugins_url( '/widget-data.js', __FILE__ ), array( 'jquery', 'wp-ajax-response' ) );	
+			wp_enqueue_style( 'widget_data', plugins_url( 'widget-data.css', __FILE__ ) );
+			wp_enqueue_script( 'widget_data', plugins_url( 'widget-data.js', __FILE__ ), array( 'jquery', 'wp-ajax-response' ) );	
 			wp_localize_script( 'widget_data', 'widgets_url', get_admin_url( false, 'widgets.php' ) );
 		} );
 	}
@@ -92,14 +92,13 @@ class Widget_Data {
 								<div class="widgets">
 									<?php
 									foreach ( $widget_list as $widget ) :
-
 										$widget_type = trim( substr( $widget, 0, strrpos( $widget, '-' ) ) );
 										$widget_type_index = trim( substr( $widget, strrpos( $widget, '-' ) + 1 ) );
 										$widget_options = get_option( 'widget_' . $widget_type );
 										$widget_title = isset( $widget_options[$widget_type_index]['title'] ) ? $widget_options[$widget_type_index]['title'] : $widget_type_index;
 										?>
 										<div class="import-form-row">
-											<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?> widget-checkbox" type="checkbox" name="<?php echo esc_attr( $widget ); ?>" id="<?php echo esc_attr( 'meta_' .  $widget ); ?>" />
+											<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?> widget-checkbox" type="checkbox" name="<?php echo esc_attr( printf('widgets[%s][%d]', $widget_type, $widget_type_index) ); ?>" id="<?php echo esc_attr( 'meta_' .  $widget ); ?>" />
 											<label for="<?php echo esc_attr( 'meta_' . $widget ); ?>">
 												<?php 
 													echo ucfirst( $widget_type );
@@ -144,12 +143,10 @@ class Widget_Data {
 								if( is_wp_error($json) )
 									wp_die( $json->get_error_message() );
 
-								if( !( $json_data = json_decode( $json[0], true ) ) )
+								if( !$json || !isset($json['widget_json']) || !( $json_data = json_decode( $json['widget_json'], true ) ) )
 									return;
-
-								$json_file = $json[1];
 							?>
-							<input type="hidden" name="import_file" value="<?php echo esc_attr( $json_file ); ?>"/>
+							<input type="hidden" name="import_file" value="<?php echo esc_attr( $json['url'] ); ?>"/>
 							<input type="hidden" name="action" value="import_widget_data"/>
 							<div class="title">
 								<p class="widget-selection-error">Please select a widget to continue.</p>
@@ -160,19 +157,16 @@ class Widget_Data {
 								<?php
 								if ( isset( $json_data[0] ) ) :
 									foreach ( self::order_sidebar_widgets( $json_data[0] ) as $sidebar_name => $widget_list ) :
-										if ( count( $widget_list ) == 0 ) {
+										if ( empty( $widget_list ) ) 
 											continue;
-										}
-										$sidebar_info = self::get_sidebar_info( $sidebar_name );
-										if ( $sidebar_info ) : ?>
+										
+										if ( $sidebar_info = self::get_sidebar_info( $sidebar_name ) ) : ?>
 											<div class="sidebar">
 												<h4><?php echo $sidebar_info['name']; ?></h4>
 
 												<div class="widgets">
 													<?php
 													foreach ( $widget_list as $widget ) :
-														$widget_options = false;
-
 														$widget_type = trim( substr( $widget, 0, strrpos( $widget, '-' ) ) );
 														$widget_type_index = trim( substr( $widget, strrpos( $widget, '-' ) + 1 ) );
 														foreach ( $json_data[1] as $name => $option ) {
@@ -231,47 +225,40 @@ class Widget_Data {
 	public static function parse_export_data( $posted_array ) {
 		$sidebars_array = get_option( 'sidebars_widgets' );
 		$sidebar_export = array( );
+		$widgets_array = array( );
+
 		foreach ( $sidebars_array as $sidebar => $widgets ) {
 			if ( !empty( $widgets ) && is_array( $widgets ) ) {
 				foreach ( $widgets as $sidebar_widget ) {
-					if ( in_array( $sidebar_widget, array_keys( $posted_array ) ) ) {
+					$widget_title = trim( substr( $sidebar_widget, 0, strrpos( $sidebar_widget, '-' ) ) );
+					if ( in_array( $widget_title, array_keys( $posted_array['widgets'] ) ) ) {
 						$sidebar_export[$sidebar][] = $sidebar_widget;
+					} else {
+						error_log('widget ' . $widget_title);
+						error_log(print_r($posted_array['widgets'], true));
 					}
 				}
 			}
 		}
-		$widgets = array( );
-		foreach ( $posted_array as $k => $v ) {
-			$widget = array( );
-			$widget['type'] = trim( substr( $k, 0, strrpos( $k, '-' ) ) );
-			$widget['type-index'] = trim( substr( $k, strrpos( $k, '-' ) + 1 ) );
-			$widget['export_flag'] = ($v == 'on') ? true : false;
-			$widgets[] = $widget;
-		}
-		$widgets_array = array( );
-		foreach ( $widgets as $widget ) {
-			$widget_val = get_option( 'widget_' . $widget['type'] );
-			$multiwidget_val = $widget_val['_multiwidget'];
-			$widgets_array[$widget['type']][$widget['type-index']] = $widget_val[$widget['type-index']];
-			if ( isset( $widgets_array[$widget['type']]['_multiwidget'] ) )
-				unset( $widgets_array[$widget['type']]['_multiwidget'] );
 
-			$widgets_array[$widget['type']]['_multiwidget'] = $multiwidget_val;
+		foreach ( $posted_array['widgets'] as $type => $value ) {
+			$widget_val = get_option( 'widget_' . $type );
+			foreach( array_keys( $value ) as $type_index){
+				$widgets_array[$type] = array(
+				    $type_index => $widget_val[$type_index],
+				    '_multiwidget' => $widget_val['_multiwidget']
+				);
+			}
 		}
-		unset( $widgets_array['export'] );
-		$export_array = array( $sidebar_export, $widgets_array );
-		error_log(var_export($export_array, true));
-		$json = json_encode( $export_array );
-		return $json;
+		
+		return json_encode( array( $sidebar_export, $widgets_array ) );
 	}
 
 	/**
 	 * Import widgets
 	 * @param array $import_array
 	 */
-	public static function parse_import_data( $import_array ) {
-		$sidebars_data = $import_array[0];
-		$widget_data = $import_array[1];
+	public static function parse_import_data( $sidebars_data, $widget_data ) {
 		$current_sidebars = get_option( 'sidebars_widgets' );
 		$new_widgets = array( );
 
@@ -341,7 +328,7 @@ class Widget_Data {
 	 * Parse JSON import file and load
 	 */
 	public static function ajax_import_widget_data() {
-		$response = array(
+		$ajax_response = array(
 			'what' => 'widget_import_export',
 			'action' => 'import_submit'
 		);
@@ -350,13 +337,20 @@ class Widget_Data {
 		$import_file = isset( $_POST['import_file'] ) ? $_POST['import_file'] : false;
 
 		if( empty($widgets) || empty($import_file) ){
-			$response['id'] = new WP_Error('import_widget_data', 'No widget data posted to import');
-			$response = new WP_Ajax_Response( $response );
-			$response->send();
+			$ajax_response['id'] = new WP_Error('import_widget_data', 'No widget data posted to import');
+			$ajax_response = new WP_Ajax_Response( $ajax_response );
+			$ajax_response->send();
 		}
 
-		$json_data = file_get_contents( $import_file );
-		$json_data = json_decode( $json_data, true );
+		$response = wp_remote_get( $import_file );
+		if( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) != 200 ){
+			$ajax_response['id'] = new WP_Error( 'widget_import_submit', 'Error retreiving uploaded JSON file' );
+			$ajax_response = new WP_Ajax_Response( $ajax_response );
+			$ajax_response->send();
+		}
+
+		$response = wp_remote_retrieve_body($response);
+		$json_data = json_decode( $response, true );
 		$sidebar_data = $json_data[0];
 		$widget_data = $json_data[1];
 		foreach ( $sidebar_data as $title => $sidebar ) {
@@ -378,11 +372,10 @@ class Widget_Data {
 			}
 		}
 
-		$sidebar_data = array( array_filter( $sidebar_data ), $widgets );
-		$response['id'] = ( self::parse_import_data( $sidebar_data ) ) ? true : new WP_Error( 'widget_import_submit', 'Unknown Error' );
+		$ajax_response['id'] = ( self::parse_import_data( array_filter( $sidebar_data ), $widgets ) ) ? true : new WP_Error( 'widget_import_submit', 'Unknown Error' );
 
-		$response = new WP_Ajax_Response( $response );
-		$response->send();
+		$ajax_response = new WP_Ajax_Response( $ajax_response );
+		$ajax_response->send();
 	}
 
 	/**
@@ -398,8 +391,14 @@ class Widget_Data {
 		if( isset( $widget_settings['error'] ) )
 			return new WP_Error( 'widget_import_upload_error', $widget_settings['error'] );
 
-		$file_contents = file_get_contents( $widget_settings['url'] );
-		return array( $file_contents, $widget_settings['url'] );
+		$response = wp_remote_get( $widget_settings['url'] );
+		
+		if( wp_remote_retrieve_response_code($response) != 200 )
+			return new WP_Error( 'widget_import_upload_error', 'Uploaded file read failed.' );
+			
+		$file_contents = wp_remote_retrieve_body($response);
+
+		return (is_wp_error($file_contents) || !$file_contents) ? false : array( 'widget_json' => $file_contents, 'url' => $widget_settings['url'] );
 	}
 
 	/**
