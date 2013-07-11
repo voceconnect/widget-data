@@ -60,7 +60,8 @@ class Widget_Data {
 							if ( empty( $widget_list ) )
 								continue;
 
-							if( $sidebar_info = self::get_sidebar_info( $sidebar_name ) ): ?>
+							$sidebar_info = self::get_sidebar_info( $sidebar_name );
+							if( !empty($sidebar_info) ): ?>
 								<div class="sidebar">
 									<h4><?php echo $sidebar_info['name']; ?></h4>
 
@@ -120,7 +121,7 @@ class Widget_Data {
 								if( is_wp_error($json) )
 									wp_die( $json->get_error_message() );
 
-								if( !$json || !isset($json['widget_json']) || !( $json_data = json_decode( $json[0], true ) ) )
+								if( !$json || !( $json_data = json_decode( $json[0], true ) ) )
 									return;
 
 								$json_file = $json[1];
