@@ -15,7 +15,7 @@ class Widget_Data {
 	}
 
 	/**
-	 * Register admin pages 
+	 * Register admin pages
 	 */
 	public static function add_admin_menus() {
 		// export
@@ -28,13 +28,13 @@ class Widget_Data {
 				return;
 
 			wp_enqueue_style( 'widget_data', plugins_url( '/widget-data.css', __FILE__ ) );
-			wp_enqueue_script( 'widget_data', plugins_url( '/widget-data.js', __FILE__ ), array( 'jquery', 'wp-ajax-response' ) );	
+			wp_enqueue_script( 'widget_data', plugins_url( '/widget-data.js', __FILE__ ), array( 'jquery', 'wp-ajax-response' ) );
 			wp_localize_script( 'widget_data', 'widgets_url', get_admin_url( false, 'widgets.php' ) );
 		} );
 	}
 
 	/**
-	 * HTML for export admin page 
+	 * HTML for export admin page
 	 */
 	public static function export_settings_page() {
 		$sidebar_widgets = self::order_sidebar_widgets( wp_get_sidebars_widgets() );
@@ -78,10 +78,10 @@ class Widget_Data {
 										<div class="import-form-row">
 											<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?> widget-checkbox" type="checkbox" name="<?php echo esc_attr( $widget ); ?>" id="<?php echo esc_attr( 'meta_' .  $widget ); ?>" />
 											<label for="<?php echo esc_attr( 'meta_' . $widget ); ?>">
-												<?php 
+												<?php
 													echo ucfirst( $widget_type );
 													if( !empty( $widget_title ) )
-														echo ' - ' . $widget_title; 
+														echo ' - ' . $widget_title;
 												?>
 											</label>
 										</div>
@@ -99,7 +99,7 @@ class Widget_Data {
 
 	/**
 	 * HTML for import admin page
-	 * @return type 
+	 * @return type
 	 */
 	public static function import_settings_page() {
 		?>
@@ -167,10 +167,10 @@ class Widget_Data {
 														<div class="import-form-row">
 															<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?> widget-checkbox" type="checkbox" name="<?php echo esc_attr( printf('widgets[%s][%d]', $widget_type, $widget_type_index) ); ?>" id="<?php echo esc_attr( 'meta_' . $widget ); ?>" />
 															<label for="meta_<?php echo esc_attr( 'meta_' . $widget ); ?>">&nbsp;
-																<?php 
+																<?php
 																	echo ucfirst( $widget_type );
 																	if( !empty( $widget_title ) )
-																		echo ' - ' . $widget_title; 
+																		echo ' - ' . $widget_title;
 																?>
 															</label>
 														</div>
@@ -203,7 +203,7 @@ class Widget_Data {
 	/**
 	 * Retrieve widgets from sidebars and create JSON object
 	 * @param array $posted_array
-	 * @return string 
+	 * @return string
 	 */
 	public static function parse_export_data( $posted_array ) {
 		$sidebars_array = get_option( 'sidebars_widgets' );
@@ -237,7 +237,6 @@ class Widget_Data {
 		}
 		unset( $widgets_array['export'] );
 		$export_array = array( $sidebar_export, $widgets_array );
-		error_log(var_export($export_array, true));
 		$json = json_encode( $export_array );
 		return $json;
 	}
@@ -277,7 +276,7 @@ class Widget_Data {
 					} else {
 						$current_widget_data[$new_index] = $widget_data[$title][$index];
 						$current_multiwidget = $current_widget_data['_multiwidget'];
-						$new_multiwidget = $widget_data[$title]['_multiwidget'];
+						$new_multiwidget = isset($widget_data[$title]['_multiwidget']) ? $widget_data[$title]['_multiwidget'] : false;
 						$multiwidget = ($current_multiwidget != $new_multiwidget) ? $current_multiwidget : 1;
 						unset( $current_widget_data['_multiwidget'] );
 						$current_widget_data['_multiwidget'] = $multiwidget;
@@ -364,24 +363,24 @@ class Widget_Data {
 
 	/**
 	 * Read uploaded JSON file
-	 * @return type 
+	 * @return type
 	 */
 	public static function get_widget_settings_json() {
 		$widget_settings = self::upload_widget_settings_file();
-		
+
 		if( is_wp_error( $widget_settings ) || ! $widget_settings )
 			return false;
 
 		if( isset( $widget_settings['error'] ) )
 			return new WP_Error( 'widget_import_upload_error', $widget_settings['error'] );
 
-		$file_contents = file_get_contents( $widget_settings['url'] );
-		return array( $file_contents, $widget_settings['url'] );
+		$file_contents = file_get_contents( $widget_settings['file'] );
+		return array( $file_contents, $widget_settings['file'] );
 	}
 
 	/**
 	 * Upload JSON file
-	 * @return boolean 
+	 * @return boolean
 	 */
 	public static function upload_widget_settings_file() {
 		if ( isset( $_FILES['widget-upload-file'] ) ) {
@@ -400,7 +399,7 @@ class Widget_Data {
 	 *
 	 * @param string $widget_name
 	 * @param string $widget_index
-	 * @return string 
+	 * @return string
 	 */
 	public static function get_new_widget_name( $widget_name, $widget_index ) {
 		$current_sidebars = get_option( 'sidebars_widgets' );
@@ -423,7 +422,7 @@ class Widget_Data {
 	 *
 	 * @global type $wp_registered_sidebars
 	 * @param type $sidebar_id
-	 * @return boolean 
+	 * @return boolean
 	 */
 	public static function get_sidebar_info( $sidebar_id ) {
 		global $wp_registered_sidebars;
@@ -443,7 +442,7 @@ class Widget_Data {
 	/**
 	 *
 	 * @param array $sidebar_widgets
-	 * @return type 
+	 * @return type
 	 */
 	public static function order_sidebar_widgets( $sidebar_widgets ) {
 		$inactive_widgets = false;
@@ -461,7 +460,7 @@ class Widget_Data {
 	/**
 	 * Add mime type for JSON
 	 * @param array $existing_mimes
-	 * @return string 
+	 * @return string
 	 */
 	public static function json_upload_mimes( $existing_mimes = array( ) ) {
 		$existing_mimes['json'] = 'application/json';
