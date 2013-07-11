@@ -57,38 +57,37 @@ class Widget_Data {
 					<div class="sidebars">
 						<?php
 						foreach ( $sidebar_widgets as $sidebar_name => $widget_list ) :
-							if ( count( $widget_list ) == 0 )
+							if ( empty( $widget_list ) )
 								continue;
 
-							$sidebar_info = self::get_sidebar_info( $sidebar_name );
-							?>
+							if( $sidebar_info = self::get_sidebar_info( $sidebar_name ) ): ?>
+								<div class="sidebar">
+									<h4><?php echo $sidebar_info['name']; ?></h4>
 
-							<div class="sidebar">
-								<h4><?php echo $sidebar_info['name']; ?></h4>
+									<div class="widgets">
+										<?php
+										foreach ( $widget_list as $widget ) :
 
-								<div class="widgets">
-									<?php
-									foreach ( $widget_list as $widget ) :
-
-										$widget_type = trim( substr( $widget, 0, strrpos( $widget, '-' ) ) );
-										$widget_type_index = trim( substr( $widget, strrpos( $widget, '-' ) + 1 ) );
-										$widget_options = get_option( 'widget_' . $widget_type );
-										$widget_title = isset( $widget_options[$widget_type_index]['title'] ) ? $widget_options[$widget_type_index]['title'] : $widget_type_index;
-										?>
-										<div class="import-form-row">
-											<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?> widget-checkbox" type="checkbox" name="<?php echo esc_attr( $widget ); ?>" id="<?php echo esc_attr( 'meta_' .  $widget ); ?>" />
-											<label for="<?php echo esc_attr( 'meta_' . $widget ); ?>">
-												<?php
-													echo ucfirst( $widget_type );
-													if( !empty( $widget_title ) )
-														echo ' - ' . $widget_title;
-												?>
-											</label>
-										</div>
-									<?php endforeach; ?>
-								</div> <!-- end widgets -->
-							</div> <!-- end sidebar -->
-						<?php endforeach; ?>
+											$widget_type = trim( substr( $widget, 0, strrpos( $widget, '-' ) ) );
+											$widget_type_index = trim( substr( $widget, strrpos( $widget, '-' ) + 1 ) );
+											$widget_options = get_option( 'widget_' . $widget_type );
+											$widget_title = isset( $widget_options[$widget_type_index]['title'] ) ? $widget_options[$widget_type_index]['title'] : $widget_type_index;
+											?>
+											<div class="import-form-row">
+												<input class="<?php echo ($sidebar_name == 'wp_inactive_widgets') ? 'inactive' : 'active'; ?> widget-checkbox" type="checkbox" name="<?php echo esc_attr( $widget ); ?>" id="<?php echo esc_attr( 'meta_' .  $widget ); ?>" />
+												<label for="<?php echo esc_attr( 'meta_' . $widget ); ?>">
+													<?php
+														echo ucfirst( $widget_type );
+														if( !empty( $widget_title ) )
+															echo ' - ' . $widget_title;
+													?>
+												</label>
+											</div>
+										<?php endforeach; ?>
+									</div> <!-- end widgets -->
+								</div> <!-- end sidebar -->
+							<?php endif;
+						endforeach; ?>
 					</div> <!-- end sidebars -->
 					<input class="button-bottom button-primary" type="submit" value="Export Widget Settings"/>
 				</form>
@@ -121,7 +120,7 @@ class Widget_Data {
 								if( is_wp_error($json) )
 									wp_die( $json->get_error_message() );
 
-								if( !( $json_data = json_decode( $json[0], true ) ) )
+								if( !$json || !isset($json['widget_json']) || !( $json_data = json_decode( $json[0], true ) ) )
 									return;
 
 								$json_file = $json[1];
