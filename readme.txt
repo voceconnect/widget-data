@@ -2,8 +2,8 @@
 Contributors: kevinlangleyjr, smccafferty, markparolisi, voceplatforms
 Tags: widget, import, export
 Requires at least: 2.8
-Tested up to: 3.5
-Stable tag: 1.1
+Tested up to: 3.5.2
+Stable tag: 1.2
 
 Allows you to export and import widgets settings.
 
