@@ -11,7 +11,9 @@ Allows you to export and import widgets settings.
 
 Gives the user the ability to export the current widget settings and states as a json file. You can then import those settings on a different server or installation of WordPress so you have the same widgets within the same sidebars as the export. The import will not overwrite any data currently within the sidebars, but instead will increment the widgets and add a new instance of the widget instead.
 
-**Please note that the plugin currently does not import anything if that particular sidebar is unavailable during the import.
+** Please note that the plugin currently does not import anything if that particular sidebar is unavailable during the import.
+
+*** This plugin requires at least PHP 5.3.0
 
 == Installation ==
 
@@ -24,6 +26,10 @@ Gives the user the ability to export the current widget settings and states as a
 2. Upload JSON export file
 
 == Changelog ==
+
+= 1.2 =
+* Adding PHP version check to avoid errors upon activation.
+* Using locally uploaded file instead of url to retreive uploaded json
 
 = 1.1 =
 * Refactoring for performance / integrating changes made by Automattic
