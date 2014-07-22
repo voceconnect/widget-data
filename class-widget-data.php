@@ -21,10 +21,10 @@ class Widget_Data {
 	 * Register admin pages
 	 */
 	public static function add_admin_menus() {
-		// export
-		self::$export_page = add_management_page( 'Widget Settings Export', 'Widget Settings Export', 'manage_options', 'widget-settings-export', array( __CLASS__, 'export_settings_page' ) );
 		//import
 		self::$import_page = add_management_page( 'Widget Settings Import', 'Widget Settings Import', 'manage_options', 'widget-settings-import', array( __CLASS__, 'import_settings_page' ) );
+		// export
+		self::$export_page = add_management_page( 'Widget Settings Export', 'Widget Settings Export', 'manage_options', 'widget-settings-export', array( __CLASS__, 'export_settings_page' ) );
 
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_scripts' ) );
 	}
