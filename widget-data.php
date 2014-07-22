@@ -23,7 +23,7 @@
  * ******************************************************************
  */
 
-define( "WIDGET_DATA_MIN_PHP_VER", '5.3.0' );
+define( "WIDGET_DATA_MIN_PHP_VER", '5.2.0' );
 
 register_activation_hook( __FILE__, 'widget_data_activation' );
 
