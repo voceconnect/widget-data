@@ -2,8 +2,8 @@
 Contributors: kevinlangleyjr, smccafferty, markparolisi, voceplatforms
 Tags: widget, import, export
 Requires at least: 2.8
-Tested up to: 3.5.2
-Stable tag: 1.2
+Tested up to: 3.9.1
+Stable tag: 1.3
 
 Allows you to export and import widgets settings.
 
@@ -13,7 +13,7 @@ Gives the user the ability to export the current widget settings and states as a
 
 ** Please note that the plugin currently does not import anything if that particular sidebar is unavailable during the import.
 
-*** This plugin requires at least PHP 5.3.0
+*** This plugin requires at least PHP 5.2.0
 
 == Installation ==
 
@@ -26,6 +26,9 @@ Gives the user the ability to export the current widget settings and states as a
 2. Upload JSON export file
 
 == Changelog ==
+= 1.3 =
+* Adding support for PHP 5.2
+* Swapping registration order of pages
 
 = 1.2 =
 * Adding PHP version check to avoid errors upon activation.
