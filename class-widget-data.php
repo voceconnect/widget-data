@@ -2,6 +2,9 @@
 
 class Widget_Data {
 
+	static $export_page;
+	static $import_page;
+
 	/**
 	 * initialize
 	 */
@@ -19,18 +22,20 @@ class Widget_Data {
 	 */
 	public static function add_admin_menus() {
 		// export
-		$export_page = add_management_page( 'Widget Settings Export', 'Widget Settings Export', 'manage_options', 'widget-settings-export', array( __CLASS__, 'export_settings_page' ) );
+		self::$export_page = add_management_page( 'Widget Settings Export', 'Widget Settings Export', 'manage_options', 'widget-settings-export', array( __CLASS__, 'export_settings_page' ) );
 		//import
-		$import_page = add_management_page( 'Widget Settings Import', 'Widget Settings Import', 'manage_options', 'widget-settings-import', array( __CLASS__, 'import_settings_page' ) );
+		self::$import_page = add_management_page( 'Widget Settings Import', 'Widget Settings Import', 'manage_options', 'widget-settings-import', array( __CLASS__, 'import_settings_page' ) );
 
-		add_action( 'admin_enqueue_scripts', function($hook) use ($export_page, $import_page){
-			if( !in_array( $hook, array( $export_page, $import_page ) ) )
-				return;
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_scripts' ) );
+	}
 
-			wp_enqueue_style( 'widget_data', plugins_url( '/widget-data.css', __FILE__ ) );
-			wp_enqueue_script( 'widget_data', plugins_url( '/widget-data.js', __FILE__ ), array( 'jquery', 'wp-ajax-response' ) );
-			wp_localize_script( 'widget_data', 'widgets_url', get_admin_url( false, 'widgets.php' ) );
-		} );
+	public static function enqueue_admin_scripts( $hook ) {
+		if( !in_array( $hook, array( self::$export_page, self::$import_page ) ) )
+			return;
+
+		wp_enqueue_style( 'widget_data', plugins_url( '/widget-data.css', __FILE__ ) );
+		wp_enqueue_script( 'widget_data', plugins_url( '/widget-data.js', __FILE__ ), array( 'jquery', 'wp-ajax-response' ) );
+		wp_localize_script( 'widget_data', 'widgets_url', get_admin_url( false, 'widgets.php' ) );
 	}
 
 	/**
