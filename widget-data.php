@@ -23,17 +23,5 @@
  * ******************************************************************
  */
 
-define( "WIDGET_DATA_MIN_PHP_VER", '5.2.0' );
-
-register_activation_hook( __FILE__, 'widget_data_activation' );
-
-function widget_data_activation() {
-	if ( version_compare( phpversion(), WIDGET_DATA_MIN_PHP_VER, '<' ) ) {
-		die( sprintf( "The minimum PHP version required for this plugin is %s", WIDGET_DATA_MIN_PHP_VER ) );
-	}
-}
-
-if ( version_compare( phpversion(), WIDGET_DATA_MIN_PHP_VER, '>=' ) ) {
-	require( __DIR__ . '/class-widget-data.php' );
-	add_action( 'init', array( 'Widget_Data', 'init' ) );
-}
+require( __DIR__ . '/class-widget-data.php' );
+add_action( 'init', array( 'Widget_Data', 'init' ) );
