@@ -233,6 +233,7 @@ class Widget_Data {
 		$widgets_array = array( );
 		foreach ( $widgets as $widget ) {
 			$widget_val = get_option( 'widget_' . $widget['type'] );
+			$widget_val = apply_filters( 'widget_data_export', $widget_val, $widget );
 			$multiwidget_val = $widget_val['_multiwidget'];
 			$widgets_array[$widget['type']][$widget['type-index']] = $widget_val[$widget['type-index']];
 			if ( isset( $widgets_array[$widget['type']]['_multiwidget'] ) )
@@ -295,8 +296,10 @@ class Widget_Data {
 		if ( isset( $new_widgets ) && isset( $current_sidebars ) ) {
 			update_option( 'sidebars_widgets', $current_sidebars );
 
-			foreach ( $new_widgets as $title => $content )
+			foreach ( $new_widgets as $title => $content ) {
+				$content = apply_filters( 'widget_data_import', $content, $title );
 				update_option( 'widget_' . $title, $content );
+			}
 
 			return true;
 		}
