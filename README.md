@@ -20,10 +20,10 @@ Gives the user the ability to export the current widget settings and states as a
 
 
 ## Screenshots
-![Export Screen](screenshot-1.png)
+![Export Screen](screenshot-1.png)  
 1. Choose which widgets to export  
 
-![Export Screen](screenshot-2.png)
+![Export Screen](screenshot-2.png)  
 2. Upload JSON export file
 
 
