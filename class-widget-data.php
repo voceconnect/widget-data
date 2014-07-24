@@ -233,7 +233,7 @@ class Widget_Data {
 		$widgets_array = array( );
 		foreach ( $widgets as $widget ) {
 			$widget_val = get_option( 'widget_' . $widget['type'] );
-			$widget_val = apply_filters( 'widget_data_export', $widget_val, $widget );
+			$widget_val = apply_filters( 'widget_data_export', $widget_val, $widget['type'] );
 			$multiwidget_val = $widget_val['_multiwidget'];
 			$widgets_array[$widget['type']][$widget['type-index']] = $widget_val[$widget['type-index']];
 			if ( isset( $widgets_array[$widget['type']]['_multiwidget'] ) )
@@ -316,6 +316,9 @@ class Widget_Data {
 			header( "Content-Description: File Transfer" );
 			header( "Content-Disposition: attachment; filename=widget_data.json" );
 			header( "Content-Type: application/octet-stream" );
+			unset($_POST['action']);
+			unset($_POST['_wpnonce']);
+			unset($_POST['_wp_http_referer']);
 			echo self::parse_export_data( $_POST );
 			exit;
 		}
