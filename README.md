@@ -3,8 +3,9 @@ Contributors: kevinlangleyjr, smccafferty, markparolisi, voceplatforms
 Tags: widget, import, export  
 Requires at least: 2.8  
 Tested up to: 3.9.1  
-Stable tag: 1.3  
-
+Stable tag: 1.3.1
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 ## Description
 
@@ -12,48 +13,6 @@ Gives the user the ability to export the current widget settings and states as a
 
 **Please note that the plugin currently does not import anything if that particular sidebar is unavailable during the import.**
 
+## More Information
 
-## Installation
-
-1. Upload entire widget-data directory to the `/wp-content/plugins/` directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
-
-
-## Screenshots
-![Export Screen](screenshot-1.png)  
-1. Choose which widgets to export  
-
-![Export Screen](screenshot-2.png)  
-2. Upload JSON export file
-
-
-## Changelog
-
-**1.3**
-* Adding support for PHP 5.2
-* Swapping registration order of pages
-
-**1.2**
-* Adding PHP version check to avoid errors upon activation.
-* Using locally uploaded file instead of url to retreive uploaded json
-
-**1.1**
-* Refactoring for performance / integrating changes made by Automattic
-* Better styles for wp-admin
-
-**1.0**
-* Refactoring for performace.
-* Documentation
-* Better styles for wp-admin
-
-**0.4**
-* Fixing headers already sent error
-
-**0.3**
-* Fixing export of empty file by instead of creating temp file, it will just output the json
-
-**0.2**
-* Fixing blank redirect with WP installed within sub directory
-
-**0.1**
-* First Version
+For more information, please refer to the [wiki](https://github.com/voceconnect/widget-data/wiki).
