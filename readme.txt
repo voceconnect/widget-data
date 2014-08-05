@@ -3,7 +3,7 @@ Contributors: kevinlangleyjr, smccafferty, markparolisi, voceplatforms
 Tags: widget, import, export
 Requires at least: 2.8
 Tested up to: 3.9.1
-Stable tag: 1.3
+Stable tag: 1.4
 
 Allows you to export and import widgets settings.
 
@@ -26,6 +26,9 @@ Gives the user the ability to export the current widget settings and states as a
 2. Upload JSON export file
 
 == Changelog ==
+= 1.4 =
+* Adding hooks on import and export for custom widget data handling
+
 = 1.3 =
 * Adding support for PHP 5.2
 * Swapping registration order of pages

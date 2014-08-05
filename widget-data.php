@@ -4,7 +4,7 @@
   Description: Adds functionality to export and import widget data
   Author: Voce Communications - Kevin Langley, Sean McCafferty, Mark Parolisi
   Author URI: http://vocecommunications.com
-  Version: 1.3
+  Version: 1.4
  * ******************************************************************
   Copyright 2011-2011 Voce Communications
 
