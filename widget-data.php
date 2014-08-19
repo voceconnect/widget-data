@@ -23,5 +23,5 @@
  * ******************************************************************
  */
 
-require( __DIR__ . '/class-widget-data.php' );
+require( dirname(__FILE__) . '/class-widget-data.php' );
 add_action( 'init', array( 'Widget_Data', 'init' ) );
