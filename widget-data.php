@@ -4,7 +4,7 @@
   Description: Adds functionality to export and import widget data
   Author: Voce Communications - Kevin Langley, Sean McCafferty, Mark Parolisi
   Author URI: http://vocecommunications.com
-  Version: 1.4
+  Version: 1.4.1
  * ******************************************************************
   Copyright 2011-2011 Voce Communications
 
@@ -23,5 +23,5 @@
  * ******************************************************************
  */
 
-require( __DIR__ . '/class-widget-data.php' );
+require( dirname(__FILE__) . '/class-widget-data.php' );
 add_action( 'init', array( 'Widget_Data', 'init' ) );
