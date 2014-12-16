@@ -202,7 +202,7 @@ class Widget_Data {
 								<?php endif; ?>
 							</div> <!-- end sidebars -->
 							<p>
-								<input type="checkbox" name="clear-current" id="clear-current" checked=checked value="clear" />
+								<input type="checkbox" name="clear_current" id="clear-current" checked=checked value="true" />
 								<label for="clear-current">Clear Current Widgets Before Import</label>
 							</p>
 							<input class="button-bottom button-primary" type="submit" name="import-widgets" id="import-widgets" value="Import Widget Settings" />
@@ -360,6 +360,11 @@ class Widget_Data {
 			$response = new WP_Ajax_Response( $response );
 			$response->send();
 		}
+
+		$clear_current = isset( $_POST['clear_current'] );
+
+		if ( $clear_current )
+			self::clear_widgets();
 
 		$json_data = file_get_contents( $import_file );
 		$json_data = json_decode( $json_data, true );
