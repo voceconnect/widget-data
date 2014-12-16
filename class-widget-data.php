@@ -19,7 +19,17 @@ class Widget_Data {
 	}
 
 	public static function ajax_clear_widgets() {
-		echo json_encode(array('success'=>true));
+		$sidebars = wp_get_sidebars_widgets();
+		$inactive = isset($sidebars['wp_inactive_widgets']) ? $sidebars['wp_inactive_widgets'] : array();
+		unset($sidebars['wp_inactive_widgets']);
+		foreach ( $sidebars as $sidebar => $widgets ) {
+			$inactive = array_merge($inactive, $widgets);
+			$sidebars[$sidebar] = array();
+		}
+		$sidebars['wp_inactive_widgets'] = $inactive;
+		wp_set_sidebars_widgets( $sidebars );
+		$response = array( 'success' => true );
+		echo json_encode($response);
 		die;
 	}
 
