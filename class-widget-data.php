@@ -15,10 +15,9 @@ class Widget_Data {
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menus' ) );
 		add_action( 'load-tools_page_widget-settings-export', array( __CLASS__, 'export_widget_settings' ) );
 		add_action( 'wp_ajax_import_widget_data', array( __CLASS__, 'ajax_import_widget_data' ) );
-		add_action( 'wp_ajax_clear_widgets', array( __CLASS__, 'ajax_clear_widgets' ) );
 	}
 
-	public static function ajax_clear_widgets() {
+	private static function clear_widgets() {
 		$sidebars = wp_get_sidebars_widgets();
 		$inactive = isset($sidebars['wp_inactive_widgets']) ? $sidebars['wp_inactive_widgets'] : array();
 
@@ -31,10 +30,6 @@ class Widget_Data {
 
 		$sidebars['wp_inactive_widgets'] = $inactive;
 		wp_set_sidebars_widgets( $sidebars );
-
-		$response = array( 'success' => true );
-		echo json_encode($response);
-		die;
 	}
 
 	/**
