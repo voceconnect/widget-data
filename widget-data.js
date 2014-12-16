@@ -101,16 +101,16 @@
 			outputText.val(filename);
 		});
 
-		$('form#button-clear-submit').on( 'click', function( e ) {
+		$('#button-clear-submit').on( 'click', function( e ) {
 			e.preventDefault();
 			$.ajax({
 				dataType: "json",
 				url: ajaxurl,
 				data: {
-					action: 'clear-widgets'
+					action: 'clear_widgets'
 				},
 				success: function( r ) {
-
+					console.log(r);
 				}
 			});
 		} );

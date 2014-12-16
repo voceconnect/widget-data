@@ -15,6 +15,12 @@ class Widget_Data {
 		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menus' ) );
 		add_action( 'load-tools_page_widget-settings-export', array( __CLASS__, 'export_widget_settings' ) );
 		add_action( 'wp_ajax_import_widget_data', array( __CLASS__, 'ajax_import_widget_data' ) );
+		add_action( 'wp_ajax_clear_widgets', array( __CLASS__, 'ajax_clear_widgets' ) );
+	}
+
+	public static function ajax_clear_widgets() {
+		echo json_encode(array('success'=>true));
+		die;
 	}
 
 	/**
