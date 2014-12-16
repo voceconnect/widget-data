@@ -71,7 +71,7 @@
 		 */
 		$('form#import-widget-data').submit(function(e){
 			e.preventDefault();
-			
+
 			if (widgetCheckboxes.filter(':checked').length === 0) {
 				widgetSelectionError.fadeIn('slow').delay(2000).fadeOut('slow');
 				return false;
@@ -91,7 +91,7 @@
 		});
 
 		/**
-		 * 
+		 *
 		 */
 		fileInput.change(function(){
 			var outputText = $('#upload-widget-data .file-name'),
@@ -100,5 +100,6 @@
 
 			outputText.val(filename);
 		});
+
 	});
 }(window.jQuery);
