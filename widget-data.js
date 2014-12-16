@@ -104,6 +104,7 @@
 		$('#button-clear-submit').on( 'click', function( e ) {
 			e.preventDefault();
 			$.ajax({
+				type: "POST",
 				dataType: "json",
 				url: ajaxurl,
 				data: {
