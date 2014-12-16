@@ -203,7 +203,8 @@ class Widget_Data {
 							</div> <!-- end sidebars -->
 							<p>
 								<input type="checkbox" name="clear_current" id="clear-current" checked=checked value="true" />
-								<label for="clear-current">Clear Current Widgets Before Import</label>
+								<label for="clear-current">Clear Current Widgets Before Import</label><br/>
+								<span class="description">All active widgets will be moved to inactive</span>
 							</p>
 							<input class="button-bottom button-primary" type="submit" name="import-widgets" id="import-widgets" value="Import Widget Settings" />
 						</form>
