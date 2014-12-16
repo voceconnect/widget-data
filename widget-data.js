@@ -101,19 +101,5 @@
 			outputText.val(filename);
 		});
 
-		$('#button-clear-submit').on( 'click', function( e ) {
-			e.preventDefault();
-			$.ajax({
-				type: "POST",
-				dataType: "json",
-				url: ajaxurl,
-				data: {
-					action: 'clear_widgets'
-				},
-				success: function( r ) {
-					console.log(r);
-				}
-			});
-		} );
 	});
 }(window.jQuery);

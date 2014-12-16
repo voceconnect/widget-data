@@ -206,6 +206,10 @@ class Widget_Data {
 									<?php endforeach; ?>
 								<?php endif; ?>
 							</div> <!-- end sidebars -->
+							<p>
+								<input type="checkbox" name="clear-current" id="clear-current" checked=checked value="clear" />
+								<label for="clear-current">Clear Current Widgets Before Import</label>
+							</p>
 							<input class="button-bottom button-primary" type="submit" name="import-widgets" id="import-widgets" value="Import Widget Settings" />
 						</form>
 					</div>
@@ -217,7 +221,6 @@ class Widget_Data {
 							<a id="upload-button" class="button upload-button">Select a file</a>
 							<input type="file" name="widget-upload-file" id="widget-upload-file" size="40" style="display:none;" />
 						</p>
-						<button name="button-clear-submit" id="button-clear-submit" class="button hide-if-no-js">Clear Current Widgets</button>
 						<input type="submit" name="button-upload-submit" id="button-upload-submit" class="button" value="Show Widget Settings" />
 					</form>
 				<?php endif; ?>
