@@ -17,6 +17,21 @@ class Widget_Data {
 		add_action( 'wp_ajax_import_widget_data', array( __CLASS__, 'ajax_import_widget_data' ) );
 	}
 
+	private static function clear_widgets() {
+		$sidebars = wp_get_sidebars_widgets();
+		$inactive = isset($sidebars['wp_inactive_widgets']) ? $sidebars['wp_inactive_widgets'] : array();
+
+		unset($sidebars['wp_inactive_widgets']);
+
+		foreach ( $sidebars as $sidebar => $widgets ) {
+			$inactive = array_merge($inactive, $widgets);
+			$sidebars[$sidebar] = array();
+		}
+
+		$sidebars['wp_inactive_widgets'] = $inactive;
+		wp_set_sidebars_widgets( $sidebars );
+	}
+
 	/**
 	 * Register admin pages
 	 */
@@ -186,6 +201,11 @@ class Widget_Data {
 									<?php endforeach; ?>
 								<?php endif; ?>
 							</div> <!-- end sidebars -->
+							<p>
+								<input type="checkbox" name="clear_current" id="clear-current" checked=checked value="true" />
+								<label for="clear-current">Clear Current Widgets Before Import</label><br/>
+								<span class="description">All active widgets will be moved to inactive</span>
+							</p>
 							<input class="button-bottom button-primary" type="submit" name="import-widgets" id="import-widgets" value="Import Widget Settings" />
 						</form>
 					</div>
@@ -341,6 +361,11 @@ class Widget_Data {
 			$response = new WP_Ajax_Response( $response );
 			$response->send();
 		}
+
+		$clear_current = isset( $_POST['clear_current'] );
+
+		if ( $clear_current )
+			self::clear_widgets();
 
 		$json_data = file_get_contents( $import_file );
 		$json_data = json_decode( $json_data, true );
