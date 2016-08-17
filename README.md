@@ -1,3 +1,5 @@
+### Please note: This plugin is no longer being actively maintained or supported.
+
 # Widget Settings Importer/Exporter
 Contributors: kevinlangleyjr, smccafferty, markparolisi, voceplatforms  
 Tags: widget, import, export  
