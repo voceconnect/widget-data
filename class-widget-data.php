@@ -19,7 +19,7 @@ class Widget_Data {
 
 	private static function clear_widgets() {
 		$sidebars = wp_get_sidebars_widgets();
-		$inactive = isset($sidebars['wp_inactive_widgets']) && is_array( 'wp_inactive_widgets' ) ? $sidebars['wp_inactive_widgets'] : array();
+		$inactive = isset($sidebars['wp_inactive_widgets']) && is_array( $sidebars['wp_inactive_widgets'] ) ? $sidebars['wp_inactive_widgets'] : array();
 
 		unset($sidebars['wp_inactive_widgets']);
 
